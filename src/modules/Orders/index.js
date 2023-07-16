@@ -1,7 +1,8 @@
 import orders from "../../../src/dashboard/orders.json";
 import { Card, Table, Tag } from "antd";
-
+import { useNavigate } from "react-router-dom";
 const Orders = () => {
+  const navigate = useNavigate();
   const renderorderStatus = (status) => {
     if (status === "Accepted") {
       return <Tag color="green">{status}</Tag>;
@@ -39,7 +40,14 @@ const Orders = () => {
   ];
   return (
     <Card title={"Orders"} style={{ margin: 20 }}>
-      <Table dataSource={orders} columns={tableColumns} rowKey="orderID" />
+      <Table
+        dataSource={orders}
+        columns={tableColumns}
+        rowKey="orderID"
+        onRow={(orderItem) => ({
+          onClick: () => navigate(`order/${orderItem.orderID}`),
+        })}
+      />
     </Card>
   );
 };

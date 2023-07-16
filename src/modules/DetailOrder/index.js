@@ -1,9 +1,10 @@
 import { Card, Descriptions, Divider, List, Button } from "antd";
 import dishes from "../../../src/dashboard/dishes.json";
-
+import { useParams } from "react-router-dom";
 const DetailOrder = () => {
+  const { id } = useParams();
   return (
-    <Card title={"Order Title"} style={{ margin: 20 }}>
+    <Card title={`Order ${id}`} style={{ margin: 20 }}>
       <Descriptions bordered column={{ lg: 1, md: 1, sm: 1 }}>
         <Descriptions.Item label="Customer">Name LastName</Descriptions.Item>
         <Descriptions.Item label="Customer Address">
