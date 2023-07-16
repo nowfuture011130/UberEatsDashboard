@@ -13,7 +13,6 @@ const Settings = () => {
     const latlng = await getLatLng(geocode[0]);
     setCoordinates(latlng);
   };
-  console.log(address);
   return (
     <Card title="Restaurant Details" style={{ margin: 20 }}>
       <Form layout="vertical" wrapperCol={{ span: 20 }}>
