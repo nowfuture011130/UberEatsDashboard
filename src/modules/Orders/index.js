@@ -1,24 +1,30 @@
-import orders from "../../../src/dashboard/orders.json";
+import { useState, useEffect } from "react";
+import { DataStore } from "aws-amplify";
+import { Order, User2, OrderStatus } from "../../models";
 import { Card, Table, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
 const Orders = () => {
+  const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    DataStore.query(Order).then(setOrders);
+    //DataStore.query(User2, orders.user2ID);
+  }, []);
+
   const renderorderStatus = (status) => {
-    if (status === "Accepted") {
-      return <Tag color="green">{status}</Tag>;
-    }
-    if (status === "Pending") {
-      return <Tag color="orange">{status}</Tag>;
-    }
-    if (status === "Declined") {
-      return <Tag color="red">{status}</Tag>;
-    }
+    const statusToColor = {
+      [OrderStatus.NEW]: "green",
+      [OrderStatus.COOKING]: "orange",
+      [OrderStatus.READY_FOR_PICKUP]: "red",
+    };
+    return <Tag color={statusToColor[status]}>{status}</Tag>;
   };
   const tableColumns = [
     {
       title: "Order ID",
-      dataIndex: "orderID",
-      key: "orderID",
+      dataIndex: "id",
+      key: "id",
     },
     {
       title: "Delivery Address",
@@ -27,9 +33,9 @@ const Orders = () => {
     },
     {
       title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (price) => `${price} $`,
+      dataIndex: "total",
+      key: "total",
+      render: (price) => `${price.toFixed(2)} $`,
     },
     {
       title: "Status",
