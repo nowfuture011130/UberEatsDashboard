@@ -3,20 +3,35 @@ import { DataStore } from "aws-amplify";
 import { Order, User2, OrderStatus } from "../../models";
 import { Card, Table, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useRestaurantContext } from "../../contexts/RestaurantContext";
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const { restaurant } = useRestaurantContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    DataStore.query(Order).then(setOrders);
-    //DataStore.query(User2, orders.user2ID);
-  }, []);
+    if (!restaurant) {
+      return;
+    }
+    DataStore.query(Order, (o) =>
+      o.and((o) => [
+        o.orderRestaurantId.eq(restaurant.id),
+        o.or((o) => [
+          o.status.eq("NEW"),
+          o.status.eq("COOKING"),
+          o.status.eq("READY_FOR_PICKUP"),
+          o.status.eq("ACCEPTED"),
+        ]),
+      ])
+    ).then(setOrders);
+  }, [restaurant]);
 
   const renderorderStatus = (status) => {
     const statusToColor = {
       [OrderStatus.NEW]: "green",
-      [OrderStatus.COOKING]: "orange",
-      [OrderStatus.READY_FOR_PICKUP]: "red",
+      [OrderStatus.COOKING]: "#fcb900",
+      [OrderStatus.READY_FOR_PICKUP]: "#ff6900",
+      [OrderStatus.ACCEPTED]: "red",
     };
     return <Tag color={statusToColor[status]}>{status}</Tag>;
   };
@@ -27,9 +42,9 @@ const Orders = () => {
       key: "id",
     },
     {
-      title: "Delivery Address",
-      dataIndex: "deliveryAddress",
-      key: "deliveryAddress",
+      title: "Created at",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
       title: "Price",
@@ -49,9 +64,9 @@ const Orders = () => {
       <Table
         dataSource={orders}
         columns={tableColumns}
-        rowKey="orderID"
+        rowKey="id"
         onRow={(orderItem) => ({
-          onClick: () => navigate(`order/${orderItem.orderID}`),
+          onClick: () => navigate(`order/${orderItem.id}`),
         })}
       />
     </Card>
