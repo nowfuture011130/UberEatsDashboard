@@ -6,6 +6,7 @@ const RestaurantContext = createContext({});
 const RestaurantContextProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [restaurant, setRestaurant] = useState();
+  const [refresh, setRefresh] = useState(false);
   const sub = user?.attributes?.sub;
   useEffect(() => {
     Auth.currentAuthenticatedUser({ bypassCache: true }).then(setUser);
@@ -21,7 +22,9 @@ const RestaurantContextProvider = ({ children }) => {
   }, [sub]);
 
   return (
-    <RestaurantContext.Provider value={{ restaurant, sub, setRestaurant }}>
+    <RestaurantContext.Provider
+      value={{ restaurant, sub, setRestaurant, refresh, setRefresh }}
+    >
       {children}
     </RestaurantContext.Provider>
   );
