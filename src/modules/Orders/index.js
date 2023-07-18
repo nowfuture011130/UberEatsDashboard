@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataStore } from "aws-amplify";
-import { Order, User2, OrderStatus } from "../../models";
+import { Order, OrderStatus } from "../../models";
 import { Card, Table, Tag } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useRestaurantContext } from "../../contexts/RestaurantContext";
@@ -13,18 +13,33 @@ const Orders = () => {
     if (!restaurant) {
       return;
     }
-    DataStore.query(Order, (o) =>
-      o.and((o) => [
-        o.orderRestaurantId.eq(restaurant.id),
-        o.or((o) => [
-          o.status.eq("NEW"),
-          o.status.eq("COOKING"),
-          o.status.eq("READY_FOR_PICKUP"),
-          o.status.eq("ACCEPTED"),
+    DataStore.query(
+      Order,
+      (o) =>
+        o.and((o) => [
+          o.orderRestaurantId.eq(restaurant.id),
+          o.or((o) => [
+            o.status.eq("NEW"),
+            o.status.eq("COOKING"),
+            o.status.eq("READY_FOR_PICKUP"),
+            o.status.eq("ACCEPTED"),
+          ]),
         ]),
-      ])
+      {
+        sort: (s) => s.createdAt("DESCENDING"),
+      }
     ).then(setOrders);
   }, [restaurant]);
+
+  useEffect(() => {
+    const subscription = DataStore.observe(Order).subscribe((msg) => {
+      const { opType, element } = msg;
+      if (opType === "INSERT" && element.orderRestaurantId === restaurant?.id) {
+        setOrders((e) => [element, ...e]);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const renderorderStatus = (status) => {
     const statusToColor = {

@@ -8,17 +8,18 @@ import { DataStore } from "aws-amplify";
 import { Restaurant } from "../../models";
 import { useRestaurantContext } from "../../contexts/RestaurantContext";
 const Settings = () => {
-  const [name, setName] = useState("");
-  const [image, setImage] = useState("");
   const [address, setAddress] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
 
   const { sub, restaurant, setRestaurant } = useRestaurantContext();
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if (restaurant) {
-      setName(restaurant.name);
-      setImage(restaurant.image);
+      form.setFieldsValue({
+        name: restaurant.name,
+        image: restaurant.image,
+      });
       setCoordinates({ lat: restaurant.lat, lng: restaurant.lng });
     }
   }, [restaurant]);
@@ -30,15 +31,15 @@ const Settings = () => {
     setCoordinates(latlng);
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (item) => {
     if (!restaurant) {
-      await createNewRestaurant();
+      await createNewRestaurant(item);
     } else {
-      await updateRestaurant();
+      await updateRestaurant(item);
     }
   };
 
-  const updateRestaurant = async () => {
+  const updateRestaurant = async ({ name, image }) => {
     const updatedRestaurant = await DataStore.save(
       Restaurant.copyOf(restaurant, (updated) => {
         updated.name = name;
@@ -47,7 +48,6 @@ const Settings = () => {
           updated.lat = coordinates.lat;
           updated.lng = coordinates.lng;
         }
-
         updated.image = image;
       })
     );
@@ -55,7 +55,7 @@ const Settings = () => {
     message.success("Restaurant updated!");
   };
 
-  const createNewRestaurant = async (value) => {
+  const createNewRestaurant = async ({ name, image }) => {
     const newRestaurant = await DataStore.save(
       new Restaurant({
         name: name,
@@ -75,13 +75,19 @@ const Settings = () => {
   };
   return (
     <Card title="Restaurant Details" style={{ margin: 20 }}>
-      <Form layout="vertical" wrapperCol={{ span: 20 }} onFinish={onSubmit}>
-        <Form.Item label="Restaurant Name" required>
-          <Input
-            placeholder="Enter restaurant name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+      <Form
+        layout="vertical"
+        wrapperCol={{ span: 20 }}
+        onFinish={onSubmit}
+        form={form}
+      >
+        <Form.Item
+          label="Restaurant Name"
+          rules={[{ required: true }]}
+          name="name"
+          required
+        >
+          <Input placeholder="Enter restaurant name" />
         </Form.Item>
         <Form.Item label="Restaurant Address" required>
           <GooglePlacesAutocomplete
@@ -89,12 +95,14 @@ const Settings = () => {
             selectProps={{ value: address, onChange: getAddressLatLng }}
           />
         </Form.Item>
-        <Form.Item label="Restaurant Image" required>
-          <Input
-            placeholder="Enter restaurant image uri"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-          />
+
+        <Form.Item
+          label="Restaurant Image"
+          rules={[{ required: true }]}
+          name="image"
+          required
+        >
+          <Input placeholder="Enter restaurant image uri" />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
@@ -103,9 +111,7 @@ const Settings = () => {
           </Button>
         </Form.Item>
       </Form>
-      <span>
-        {coordinates?.lat} {coordinates?.lng}
-      </span>
+      <span>Current Address: {restaurant?.address}</span>
     </Card>
   );
 };

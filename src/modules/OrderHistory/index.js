@@ -9,7 +9,6 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const { restaurant } = useRestaurantContext();
   const navigate = useNavigate();
-  console.log(orders);
   useEffect(() => {
     if (!restaurant) {
       return;

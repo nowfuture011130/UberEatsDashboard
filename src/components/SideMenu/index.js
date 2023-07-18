@@ -44,7 +44,18 @@ const SideMenu = () => {
 
   return (
     <>
-      {restaurant && <h4>{restaurant.name}</h4>}
+      {restaurant && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "lightgray",
+          }}
+        >
+          <h3>{restaurant.name}</h3>
+        </div>
+      )}
       <Menu items={nemuItem} onClick={onclick} />
     </>
   );
