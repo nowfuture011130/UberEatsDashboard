@@ -1,4 +1,4 @@
-import { Form, Input, Card, Button, message } from "antd";
+import { Form, Input, Card, Button, message, InputNumber } from "antd";
 import GooglePlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
@@ -19,10 +19,19 @@ const Settings = () => {
       form.setFieldsValue({
         name: restaurant.name,
         image: restaurant.image,
+        deliveryFee: restaurant.deliveryFee,
       });
       setCoordinates({ lat: restaurant.lat, lng: restaurant.lng });
     }
   }, [restaurant]);
+
+  const validatePositiveNumber = (_, value) => {
+    const numberValue = Number(value);
+    if (!isNaN(numberValue) && numberValue < 0) {
+      return Promise.reject("Please enter a number greater than 0");
+    }
+    return Promise.resolve();
+  };
 
   const getAddressLatLng = async (address) => {
     setAddress(address);
@@ -39,7 +48,7 @@ const Settings = () => {
     }
   };
 
-  const updateRestaurant = async ({ name, image }) => {
+  const updateRestaurant = async ({ name, image, deliveryFee }) => {
     const updatedRestaurant = await DataStore.save(
       Restaurant.copyOf(restaurant, (updated) => {
         updated.name = name;
@@ -49,18 +58,19 @@ const Settings = () => {
           updated.lng = coordinates.lng;
         }
         updated.image = image;
+        updated.deliveryFee = deliveryFee;
       })
     );
     setRestaurant(updatedRestaurant);
     message.success("Restaurant updated!");
   };
 
-  const createNewRestaurant = async ({ name, image }) => {
+  const createNewRestaurant = async ({ name, image, deliveryFee }) => {
     const newRestaurant = await DataStore.save(
       new Restaurant({
         name: name,
         image: image,
-        deliveryFee: 0.5,
+        deliveryFee: deliveryFee,
         minDeliveryTime: 5,
         maxDeliveryTime: 10,
         rating: 0,
@@ -103,6 +113,20 @@ const Settings = () => {
           required
         >
           <Input placeholder="Enter restaurant image uri" />
+        </Form.Item>
+
+        <Form.Item
+          label="DeliveryFee $"
+          name="deliveryFee"
+          rules={[
+            { required: true },
+            {
+              validator: validatePositiveNumber,
+            },
+          ]}
+          required
+        >
+          <InputNumber />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
