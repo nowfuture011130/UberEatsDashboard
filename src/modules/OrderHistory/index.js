@@ -9,6 +9,7 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const { restaurant } = useRestaurantContext();
   const navigate = useNavigate();
+  // 和orders的唯一区别，过滤方法不一样
   useEffect(() => {
     if (!restaurant) {
       return;
@@ -60,6 +61,7 @@ const OrderHistory = () => {
   ];
 
   return (
+    // 和orders很像，都是card里面包含table，且table值和orders里显示的一样，点击事件也一样
     <Card title={"Orders History"} style={{ margin: 20 }}>
       <Table
         dataSource={orders}

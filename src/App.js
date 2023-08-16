@@ -13,6 +13,7 @@ const { Sider, Content, Footer } = Layout;
 Amplify.configure(awsconfig);
 
 function App() {
+  // 取得后端图片并存储
   const [image, setImage] = useState("");
   const getImage = async () => {
     const user = await Auth.currentAuthenticatedUser({ bypassCache: true });
@@ -26,14 +27,19 @@ function App() {
   }, []);
 
   return (
+    // 必须背context provider包裹才能使用里面的变量
     <RestaurantContextProvider>
+      {/* 整个界面布局 */}
       <Layout>
+        {/* 边框，显示一个图片和sidemenu组件 */}
         <Sider style={{ height: "100vh", backgroundColor: "white" }}>
           <Image src={image} preview={false} />
           <SideMenu />
         </Sider>
+        {/* 除去边框的页面中划分出主显示和页脚 */}
         <Layout>
           <Content>
+            {/* 主页面显示的是整个导航区，初始显示第一个元素 */}
             <AppRoutes />
           </Content>
           <Footer style={{ textAlign: "center" }}>

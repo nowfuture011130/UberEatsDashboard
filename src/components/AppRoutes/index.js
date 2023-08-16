@@ -7,6 +7,7 @@ import Settings from "../../modules/Settings";
 import { Routes, Route } from "react-router-dom";
 
 const AppRoutes = () => {
+  // 导航
   return (
     <Routes>
       <Route path="/" element={<Orders />} />

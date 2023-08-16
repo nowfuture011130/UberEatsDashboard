@@ -9,6 +9,7 @@ const Orders = () => {
   const { restaurant } = useRestaurantContext();
   const navigate = useNavigate();
 
+  // 当restaurant更新后，使用restaurantid读取所有在其下面的order并过滤出状态正确的并存进队列
   useEffect(() => {
     if (!restaurant) {
       return;
@@ -31,6 +32,7 @@ const Orders = () => {
     ).then(setOrders);
   }, [restaurant]);
 
+  // 用来随时更新Order状态
   useEffect(() => {
     const subscription = DataStore.observe(Order).subscribe((msg) => {
       const { opType, element } = msg;
@@ -41,6 +43,7 @@ const Orders = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // 获得状态字符串之后返回一个tag，显示在标题用的
   const renderorderStatus = (status) => {
     const statusToColor = {
       [OrderStatus.NEW]: "green",
@@ -50,6 +53,7 @@ const Orders = () => {
     };
     return <Tag color={statusToColor[status]}>{status}</Tag>;
   };
+  // 表格渲染什么内容
   const tableColumns = [
     {
       title: "Order ID",
@@ -75,11 +79,13 @@ const Orders = () => {
     },
   ];
   return (
+    // orders为标题，里面有一个表格
     <Card title={"Orders"} style={{ margin: 20 }}>
       <Table
         dataSource={orders}
         columns={tableColumns}
         rowKey="id"
+        // 把点击行的order id传到detailOrder页面并跳转过去
         onRow={(orderItem) => ({
           onClick: () => navigate(`order/${orderItem.id}`),
         })}

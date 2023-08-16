@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { DataStore } from "aws-amplify";
 import { Order, User2, OrderDish, Dish, OrderStatus } from "../../models";
 
+// 用列表展示每种订单状态对应的tag颜色
 const statusToColor = {
   [OrderStatus.NEW]: "green",
   [OrderStatus.COOKING]: "#fcb900",
@@ -13,18 +14,22 @@ const statusToColor = {
   [OrderStatus.DECLINED_BY_RESTAURANT]: "red",
 };
 const DetailOrder = () => {
+  // 存储id，order，user，dishes变量
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [user, setUser] = useState(null);
   const [dishes, setDishes] = useState([]);
+  // id变动时从aws获取新的order信息
   useEffect(() => {
     DataStore.query(Order, id).then(setOrder);
   }, [id]);
+  // 用户变动时读取新的用户ID
   useEffect(() => {
     if (order?.user2ID) {
       DataStore.query(User2, order.user2ID).then(setUser);
     }
   }, [order?.user2ID]);
+  // 用户读取到order从order中取出dishes
   useEffect(() => {
     if (!order?.id) {
       return;
@@ -42,11 +47,11 @@ const DetailOrder = () => {
       }
     );
   }, [order?.id]);
-
+  // 加载时显示加载中
   if (!order) {
     return <Spin size="large" />;
   }
-
+  // 下面三个都是更改订单状态函数
   const acceptOrder = async () => {
     updatedOrderStatus(OrderStatus.COOKING);
   };
@@ -69,10 +74,12 @@ const DetailOrder = () => {
   };
 
   return (
+    // 显示 Order和orderID
     <Card
       title={
         <span>
           Order {id}
+          {/* 显示一个tag，为order的状态 */}
           <Tag
             color={statusToColor[order.status]}
             style={{ marginLeft: "8px" }}
@@ -83,13 +90,16 @@ const DetailOrder = () => {
       }
       style={{ margin: 20 }}
     >
+      {/* 显示顾客和地址信息 */}
       <Descriptions bordered column={{ lg: 1, md: 1, sm: 1 }}>
         <Descriptions.Item label="Customer">{user?.name}</Descriptions.Item>
         <Descriptions.Item label="Customer Address">
           {user?.address}
         </Descriptions.Item>
       </Descriptions>
+      {/* 一条分割线 */}
       <Divider />
+      {/* 显示所有的物品信息 */}
       <List
         dataSource={dishes}
         renderItem={(dishItem) => (
@@ -103,11 +113,13 @@ const DetailOrder = () => {
         )}
       />
       <Divider />
+      {/* 显示总价格 */}
       <div style={styles.totalSumContainer}>
         <h2>Total:</h2>
         <h2 style={styles.totalPrice}>${order?.total?.toFixed(2)}</h2>
       </div>
       <Divider />
+      {/* 当订单状态为新时可以选择接订单或是放弃订单，订单状态会改变 */}
       {order?.status === OrderStatus.NEW && (
         <div style={styles.buttonsContainer}>
           <Button
@@ -131,6 +143,7 @@ const DetailOrder = () => {
           </Button>
         </div>
       )}
+      {/* 订单状态为cooking时可以选择食物完成按钮 */}
       {order?.status === OrderStatus.COOKING && (
         <Button block type="primary" size="large" onClick={readyForPickup}>
           Food Is Done

@@ -8,12 +8,13 @@ import { DataStore } from "aws-amplify";
 import { Restaurant } from "../../models";
 import { useRestaurantContext } from "../../contexts/RestaurantContext";
 const Settings = () => {
+  // 储存地址和坐标
   const [address, setAddress] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
 
   const { sub, restaurant, setRestaurant } = useRestaurantContext();
   const [form] = Form.useForm();
-
+  // 如果餐厅已经存在，读取信息更新表单现状
   useEffect(() => {
     if (restaurant) {
       form.setFieldsValue({
@@ -24,7 +25,7 @@ const Settings = () => {
       setCoordinates({ lat: restaurant.lat, lng: restaurant.lng });
     }
   }, [restaurant]);
-
+  // 检查数字合法性
   const validatePositiveNumber = (_, value) => {
     const numberValue = Number(value);
     if (!isNaN(numberValue) && numberValue < 0) {
@@ -32,7 +33,7 @@ const Settings = () => {
     }
     return Promise.resolve();
   };
-
+  // 获得选中地址的坐标并保存
   const getAddressLatLng = async (address) => {
     setAddress(address);
     const geocode = await geocodeByAddress(address.label);
@@ -40,6 +41,7 @@ const Settings = () => {
     setCoordinates(latlng);
   };
 
+  // 提交表单后如果已经有餐厅则更新餐厅，没餐厅则创建餐厅
   const onSubmit = async (item) => {
     if (!restaurant) {
       await createNewRestaurant(item);
@@ -48,6 +50,7 @@ const Settings = () => {
     }
   };
 
+  // 更新餐厅并把更新值传给传给aws和context
   const updateRestaurant = async ({ name, image, deliveryFee }) => {
     const updatedRestaurant = await DataStore.save(
       Restaurant.copyOf(restaurant, (updated) => {
@@ -65,6 +68,7 @@ const Settings = () => {
     message.success("Restaurant updated!");
   };
 
+  // 创建一个新餐厅并把数值传给aws和context
   const createNewRestaurant = async ({ name, image, deliveryFee }) => {
     const newRestaurant = await DataStore.save(
       new Restaurant({
@@ -83,6 +87,7 @@ const Settings = () => {
     setRestaurant(newRestaurant);
     message.success("Restaurant has been created!");
   };
+  // 渲染表单
   return (
     <Card title="Restaurant Details" style={{ margin: 20 }}>
       <Form
@@ -135,6 +140,7 @@ const Settings = () => {
           </Button>
         </Form.Item>
       </Form>
+      {/* 最后显示当前餐厅地址 */}
       <span>Current Address: {restaurant?.address}</span>
     </Card>
   );

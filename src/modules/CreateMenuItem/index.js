@@ -7,6 +7,7 @@ const { TextArea } = Input;
 const CreateMenuItem = () => {
   const { restaurant, setRefresh, refresh } = useRestaurantContext();
   const navigation = useNavigate();
+  // 点击提交表单后创建新的dish并传入aws，然后刷新菜单内容并且返回menu
   const onFinish = async ({ name, description, price, URL }) => {
     const newDish = await DataStore.save(
       new Dish({
@@ -24,6 +25,7 @@ const CreateMenuItem = () => {
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+  // 检查传入的数字是否合法
   const validatePositiveNumber = (_, value) => {
     const numberValue = Number(value);
     if (!isNaN(numberValue) && numberValue < 0) {
@@ -33,7 +35,9 @@ const CreateMenuItem = () => {
   };
 
   return (
+    // 创建一个名为New Menu Item的卡片
     <Card title="New Menu Item" style={{ margin: 20 }}>
+      {/* 表格 */}
       <Form
         layout="vertical"
         wrapperCol={{ span: 20 }}
@@ -72,6 +76,7 @@ const CreateMenuItem = () => {
         <Form.Item label="Dish Image URL" name="URL">
           <Input placeholder="Enter: Dish Image URL" />
         </Form.Item>
+        {/* 点击按钮时提交表单 */}
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Submit
